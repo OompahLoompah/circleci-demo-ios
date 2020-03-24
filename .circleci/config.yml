@@ -1,74 +1,21 @@
-version: 2
+version: 2.1
 jobs:
-  build-and-test:
+  build:
     macos:
-      xcode: "0.1.0"
-    working_directory: /Users/distiller/project
-    environment:
-      FL_OUTPUT_DIR: output
-      FASTLANE_LANE: test
-    shell: /bin/bash --login -o pipefail
+      xcode: 11.3.1
     steps:
-      - checkout
-      - run: bundle install
-      - run: sudo bundle update fastlane
-      - run: yes | bundle exec fastlane snapshot update
       - run:
-          name: Fastlane
-          command: bundle exec fastlane $FASTLANE_LANE
-      - store_artifacts:
-          path: output
-      - store_test_results:
-          path: output/scan
-
-  adhoc:
-    macos:
-      xcode: "0.1.0"
-    working_directory: /Users/distiller/project
-    environment:
-      FL_OUTPUT_DIR: output
-      FASTLANE_LANE: adhoc
-    shell: /bin/bash --login -o pipefail
-    steps:
-      - checkout
-      - run: bundle install
+          name: Setup
+          command: |
+            brew install sysbench
+            git clone git@github.com:git/git.git
+            brew unlink gettext && brew link gettext --force
+            sysbench --test=fileio prepare
+      - run:  sysbench --test=cpu --cpu-max-prime=20000 run
       - run:
-          name: Fastlane
-          command: bundle exec fastlane $FASTLANE_LANE
-      - store_artifacts:
-          path: output/Game.ipa
-
-  beta:
-    macos:
-      xcode: "0.1.0"
-    working_directory: /Users/distiller/project
-    environment:
-      FL_OUTPUT_DIR: output
-      FASTLANE_LANE: beta
-    shell: /bin/bash --login -o pipefail
-    steps:
-      - checkout
-      - run: bundle install
+          command: time make
+          working_directory: ~/project/git
       - run:
-          name: Fastlane
-          command: bundle exec fastlane $FASTLANE_LANE
-      - store_artifacts:
-          path: output/Game.ipa
-
-workflows:
-  version: 2
-  build-test-adhoc:
-    jobs:
-      - build-and-test
-      - adhoc:
-          filters:
-            branches:
-              only: development
-          requires:
-            - build-and-test
-      #- beta:
-          #filters:
-            #branches:
-              #only: master
-          #requires:
-            #- build-and-test
+          command: sysbench --test=fileio --file-test-mode=rndrw run
+      - run:
+          command: sysbench --test=cpu --cpu-max-prime=20000 --num-threads=4 run
