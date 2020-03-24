@@ -11,7 +11,7 @@ jobs:
     steps:
       - checkout
       - run: bundle install
-      - run: bundle update fastlane
+      - run: sudo bundle update fastlane
       - run: fastlane snapshot update
       - run:
           name: Fastlane
