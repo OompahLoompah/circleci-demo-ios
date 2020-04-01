@@ -5,4 +5,4 @@ jobs:
       xcode: 10.2.1
     steps:
       - run:
-          command: echo "Hello"
+          command: xcrun simctl list
