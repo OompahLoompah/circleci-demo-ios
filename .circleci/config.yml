@@ -6,3 +6,4 @@ jobs:
     steps:
       - run:
           command: xcrun simctl list
+
