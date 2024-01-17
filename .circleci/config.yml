@@ -1,26 +1,31 @@
-version: 2
+## Config to enable VNC run
+
+version: 2.1
+
+orbs:
+  macos: circleci/macos@2.4.1
+  
 jobs:
-
-  adhoc:
+  build:
     macos:
-      xcode: "15.0.1"
-    working_directory: /Users/distiller/project
-    environment:
-      FL_OUTPUT_DIR: output
-      FASTLANE_LANE: adhoc
-    shell: /bin/bash --login -o pipefail
+      xcode: 14.2.0
+    resource_class: macos.x86.medium.gen2
+    
     steps:
-      - checkout
-      - run: time git clone git@github.com:torvalds/linux
-
+      - run: xcodebuild -version
+      - run: brew --version
+      - run:
+          command: |
+            while true; do
+              sleep 600
+              echo "this in running in the background"
+            done
+          background: true
+      - macos/enable-vnc
+      
+    
+      
 workflows:
-  version: 2
-  build-test-adhoc:
+  say-hello-workflow:
     jobs:
-      - adhoc
-      #- beta:
-          #filters:
-            #branches:
-              #only: master
-          #requires:
-            #- build-and-test
+      - build
