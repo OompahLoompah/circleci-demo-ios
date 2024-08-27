@@ -1,30 +1,17 @@
-## Config to enable VNC run
-
 version: 2.1
-
-orbs:
-  macos: circleci/macos@2.4.1
   
 jobs:
   build:
     macos:
-      xcode: 14.3.1
-    resource_class: macos.x86.medium.gen2
+      xcode: 15.2.0
     
     steps:
-      - run: xcodebuild -version
-      - run: brew --version
       - run:
           command: |
-            while true; do
-              sleep 600
-              echo "this in running in the background"
+            for i in $(seq 0 1 100000); do
+                echo $i; sleep 5
             done
-          background: true
-      - macos/enable-vnc
-      
-    
-      
+
 workflows:
   say-hello-workflow:
     jobs:
